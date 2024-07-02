@@ -1,4 +1,5 @@
 import openai
+from openai import OpenAI
 import logging
 import os
 from datetime import datetime
@@ -13,16 +14,20 @@ class QueryGPT():
 
     def query_gpt(self, search_string):
         
-        openai.api_key = self.__open_ai_api_key
+        OpenAI.api_key = self.__open_ai_api_key
         
         # Create log file
         os.makedirs('logs', exist_ok=True)
         logging.basicConfig(filename=f'logs/{datetime.now().strftime("%Y%m%d%H%M%S")}_chatgpt.log', encoding='utf-8', level=logging.DEBUG, format='%(asctime)s %(message)s')
 
         try:
+            client = OpenAI(
+                api_key=os.environ.get("OPEN_AI_API_KEY"),
+            )
+
+            response = client.chat.completions.create(model="gpt-3.5-turbo",
+                messages=[{"role": "user","content": search_string}], temperature = 0.7)
             
-            response = openai.completions.create(model=self.__model, 
-                                                    prompt=[{"role":"user","content":search_string}], temperature=0.7)
             logging.info(f"Request successful") 
             return response
 
